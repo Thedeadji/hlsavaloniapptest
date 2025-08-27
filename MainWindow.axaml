@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+        x:Class="HLSTestApp.MainWindow"
+        Width="1000" Height="700"
+        Title="HLS/RTMP Stream Player">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Controls -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10" Spacing="10">
+            <ComboBox x:Name="StreamTypeCombo" Width="100" SelectedIndex="0">
+                <ComboBoxItem Content="HLS"/>
+                <ComboBoxItem Content="RTMP"/>
+            </ComboBox>
+            <TextBox x:Name="StreamUrlBox" Width="400" Text="http://127.0.0.1:8080/hls/stream.m3u8"/>
+            <Button x:Name="PlayButton" Content="Play" Click="OnPlayClick"/>
+            <Button x:Name="StopButton" Content="Stop" Click="OnStopClick"/>
+        </StackPanel>
+
+        <!-- Video Player Area -->
+        <Grid Grid.Row="1" x:Name="PlayerContainer" Background="Black">
+            <vlc:VideoView x:Name="VideoView"/>
+        </Grid>
+
+        <!-- Status -->
+        <TextBlock Grid.Row="2" x:Name="StatusText" Margin="10" Text="Ready"/>
+    </Grid>
+</Window>

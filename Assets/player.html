@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HLS Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { margin: 0; background: black; font-family: Arial, sans-serif; }
+    #video { width: 100%; height: 100%; }
+    #status { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.7); padding: 5px; }
+    #error { position: absolute; top: 50px; left: 10px; color: red; background: rgba(0,0,0,0.7); padding: 5px; display: none; }
+  </style>
+</head>
+<body>
+  <video id="video" controls autoplay muted></video>
+  <div id="status">Ready</div>
+  <div id="error"></div>
+  
+  <script>
+    const video = document.getElementById('video');
+    const status = document.getElementById('status');
+    const error = document.getElementById('error');
+    let hls = null;
+
+    function loadStream(url) {
+      status.textContent = 'Loading stream...';
+      error.style.display = 'none';
+      
+      if (hls) {
+        hls.destroy();
+      }
+
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          debug: false,
+          enableWorker: true,
+          lowLatencyMode: true
+        });
+        
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          status.textContent = 'Stream loaded successfully';
+          video.play();
+        });
+        
+        hls.on(Hls.Events.ERROR, function(event, data) {
+          console.error('HLS Error:', data);
+          error.textContent = `Error: ${data.details}`;
+          error.style.display = 'block';
+          status.textContent = 'Stream error';
+        });
+        
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        status.textContent = 'Using native HLS support';
+      } else {
+        error.textContent = 'HLS not supported in this browser';
+        error.style.display = 'block';
+        status.textContent = 'Not supported';
+      }
+    }
+
+    // Listen for messages from the parent window
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'loadStream') {
+        loadStream(event.data.url);
+      }
+    });
+
+    // Load default stream
+    loadStream('http://127.0.0.1:8080/hls/stream.m3u8');
+  </script>
+</body>
+</html>
